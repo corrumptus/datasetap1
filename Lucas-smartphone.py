@@ -220,8 +220,8 @@ def Trata_arq(m):
     return
 
 opcao = 1
-arquivo = "Lucas-smartphone.csv"
-arquivo2 = "Lucas-smartphone2.csv"
+arquivo = "smartphone_cpu_stats.csv"
+arquivo2 = "Produtos_apple.csv"
 can = False
 while opcao != 0:
     opcao = menu()
