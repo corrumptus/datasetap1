@@ -91,11 +91,11 @@ def Qualdimensitymais(m):
     return Vdimensity
 
 def Cpusname(m):
-    dickCPUs = criadick(Vfab, [])
+    dickCPUs = criadick(Vfab, '')
     for i in Vfab:
         for j in range(len(m)):
             if m[j][1] == i:
-                dickCPUs[i].append(m[j][9])            
+                dickCPUs[i] += m[j][2] + '  '
     return dickCPUs
 
 def Listarapple(m): #ainda falta criar um arquivo
@@ -232,6 +232,8 @@ while opcao != 0:
     elif opcao == 6:
         if can == True:
             CategorizaClock(R_arq)
+            for i in range(len(R_arq)):
+                print(R_arq[i])
     elif opcao == 7:
         Snap = Contasnap(R_arq)
         print('existem ' + str(len(Snap)) + ' versões da cpu Snapdragon')
@@ -241,7 +243,7 @@ while opcao != 0:
     elif opcao == 9:
         CPUs = Cpusname(R_arq)
         for i in Vfab:
-            print('A empresa ' + i + ' usa as cpus: ' + str(CPUs[i]))
+            print('A empresa ' + i + ' usa as cpus: ' + str(CPUs[i].strip().replace('  ', ', ')) + '\n')
     elif opcao == 10:
         Apple = Listarapple(R_arq)
         for i in range(len(Apple)):
