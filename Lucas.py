@@ -25,7 +25,8 @@ def Carregadados(a):
         i = i.replace('Â\xa0','')
         dados = i.split(',')
         matriz.append(dados)
-    return matriz
+    can = True
+    return matriz, can
 
 def Mediadeclock(m):
     dickclock = criadick(Vfab, 0)
@@ -56,16 +57,20 @@ def QualGPUmais(m):
     return vetGPU
 
 def CategorizaClock(m):  # ainda falta sobreescrever o arquivo
+    arq = open(arquivo, 'w')
+    matriz = []
     for i in range(len(m)):
         if int(m[i][8]) < 2200:
+            matriz.append(','.join(m[i]) + ',' + 'Lento')
             m[i].append('Lento')
         elif int(m[i][8]) >= 2200 and int(m[i][8]) < 2800:
+            matriz.append(','.join(m[i]) + ',' + 'Rápido')
             m[i].append('Rápido')
         elif int(m[i][8]) >= 2800:
+            matriz.append(','.join(m[i]) + ',' + 'Super rápido')
             m[i].append('Super Rápido')
-        print(m[i])
-    W_arq = Cria_arquivo(m)
-    existe = True
+    arq.write('\n'.join(matriz))
+    R_arq = Carregadados(arquivo)
     return
 
 def Contasnap(m):
@@ -94,11 +99,11 @@ def Cpusname(m):
     return dickCPUs
 
 def Listarapple(m): #ainda falta criar um arquivo
-    Vapple = []
+    apple = open('Produtos_apple.csv','w')
     for i in range(len(m)):
         if m[i][1] == 'Apple':
-            Vapple.append([m[i][2], m[i][8], m[i][9]])
-    return Vapple
+            apple.write(m[i][2] + ',' + str(m[i][8]) + ',' + m[i][9])
+    return apple
 
 def Coreconfig(m):
     dickCOREs = criadick(Vfab, [])
@@ -106,12 +111,14 @@ def Coreconfig(m):
     return vetCORE
 
 def Maiorclock(m):
-    dickCLOCKs = criadick(Vfab, 0)
-    for i in Vfab:
-        for j in range(len(m)):
-            if m[j][1] == i:
-                if dickCLOCKs[i] < m[j][8]:
-                    dickCLOCKs[i] = m[j][8]
+    Arqu = Carregadados('ML_ALL_benchmarks.csv')
+    Vclocks = vetorfab(Arqu)
+    dickCLOCKs = criadick(Vclocks, 0)
+    for i in Vclocks:
+        for j in range(len(Arqu)):
+            if Arqu[j][1] == i:
+                if dickCLOCKs[i] < m[j][4]:
+                    dickCLOCKs[i] = m[j][4]
     return dickCLOCKs
 
 def Cadastra(m):
@@ -183,6 +190,7 @@ def buscausada(m, V, dick):
 def Cria_arquivo(m):
     Trata_arq(m)
     W = open(arquivo, 'w')
+    return
 
 def Trata_arq(m):
     arq = open(arquivo, 'w')
@@ -197,14 +205,15 @@ def Trata_arq(m):
             arq.append(matriz+'\n')
         else:
             arq.append(matriz)
+    return
 
 opcao = 1
 arquivo = "smartphone_cpu_stats.csv"
-existe = False
+can = False
 while opcao != 0:
     opcao = menu()
     if opcao == 1:
-        R_arq = Carregadados(arquivo)
+        R_arq, can = Carregadados(arquivo)
         Vfab = vetorfab(R_arq)
     elif opcao == 2:
         for i in range(len(R_arq)):
@@ -220,8 +229,8 @@ while opcao != 0:
         GPUs = QualGPUmais(R_arq)
         for i in range(len(GPUs)):
             print('a empresa: ' + Vfab[i] + ' tem como a GPU mais usada: ' + GPUs[i][0] + ' com ' + str(GPUs[i][1]) + ' aparições')
-    elif opcao == 6: ###################
-        if existe == False:
+    elif opcao == 6:
+        if can == True:
             CategorizaClock(R_arq)
     elif opcao == 7:
         Snap = Contasnap(R_arq)
