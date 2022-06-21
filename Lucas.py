@@ -4,7 +4,7 @@ def menu():
     print('3 - Listar a média de clockspeed de cada empresa')
     print('4 - Determinar a empresa com mais modelos de CPU')
     print('5 - Listar a CPU mais utilizada por cada empresa')
-    print('6 - Criar uma nova coluna que classifica se as CPUs em Lenta(<2200), Rápida(2200<=<2800) e Super rápida(>=2800)')
+    print('6 - Criar uma nova coluna que classifica se as CPUs em Lento(<2200), Rápida(>=2200, <2800) e Super rápida(>=2800)')
     print('7 - Contar quantas versões existem da CPU Snapdragon')
     print('8 - Determinar qual é a versão mais rápida dentre as CPUs Dimensity')
     print('9 - Listar quais CPUs as empresas usam')
@@ -56,9 +56,12 @@ def QualGPUmais(m):
     vetGPU = buscausada(m, Vfab, dickGPUs)
     return vetGPU
 
-def CategorizaClock(m):  # ainda falta sobreescrever o arquivo
+def CategorizaClock(m):
     arq = open(arquivo, 'w')
     matriz = []
+    for i in range(len(m)):
+        for j in range(len(m[i])):
+            m[i][j] = str(m[i][j])
     for i in range(len(m)):
         if int(m[i][8]) < 2200:
             matriz.append(','.join(m[i]) + ',' + 'Lento')
@@ -98,11 +101,13 @@ def Cpusname(m):
                 dickCPUs[i] += m[j][2] + '  '
     return dickCPUs
 
-def Listarapple(m): #ainda falta criar um arquivo
-    apple = open('Produtos_apple.csv','w')
+def Listarapple(m):
+    apple = open(arquivo2, 'w')
+    matriz = []
     for i in range(len(m)):
         if m[i][1] == 'Apple':
-            apple.write(m[i][2] + ',' + str(m[i][8]) + ',' + m[i][9])
+            matriz.append(m[i][2] + ',' + str(m[i][8]) + ',' + m[i][9])
+    apple.write('\n'.join(matriz))
     return apple
 
 def Coreconfig(m):
@@ -111,19 +116,23 @@ def Coreconfig(m):
     return vetCORE
 
 def Maiorclock(m):
-    Arqu = Carregadados('ML_ALL_benchmarks.csv')
+    Arqu, nothing = Carregadados('ML_ALL_benchmarks.csv')
     Vclocks = vetorfab(Arqu)
-    dickCLOCKs = criadick(Vclocks, 0)
+    dickCLOCKs = criadick(Vclocks, '')
     for i in Vclocks:
+        matriz = ['',0]
         for j in range(len(Arqu)):
             if Arqu[j][1] == i:
-                if dickCLOCKs[i] < m[j][4]:
-                    dickCLOCKs[i] = m[j][4]
-    return dickCLOCKs
+                if matriz[1] < int(Arqu[j][4]):
+                    matriz[0] = Arqu[j][0]
+                    matriz[1] = int(Arqu[j][4])
+        dickCLOCKs[i] = matriz[0]
+    return dickCLOCKs, Vclocks
 
 def Cadastra(m):
+    arqu = open(arquivo, 'a')
     matriz = []
-    matriz.append(len(m)+1)
+    matriz.append(str(len(m)+1))
     matriz.append(input('Qual é a empresa? '))
     matriz.append(input('Qual é o nome da CPU? '))
     matriz.append(input('Qual é o geekbench single? '))
@@ -133,7 +142,8 @@ def Cadastra(m):
     matriz.append(input('Qual é a configuração dos núcleos?(colocar parenteses e discriminar todos via +) '))
     matriz.append(input('Qual é o Clockspeed? '))
     matriz.append(input('Qual é a GPU? '))
-    m.append(matriz)
+    arqu.write(','.join(matriz))
+    arqu.close()
     CategorizaClock(m)
     return
 
@@ -141,16 +151,18 @@ def MaisCPUmaisCORE(m):
     dickCOREs = criadick(Vfab, 0)
     dickCLOCKs = criadick(Vfab, 0)
     for i in Vfab:
+        matriz = 0
         for j in range(len(m)):
             if m[j][1] == i:
-                if dickCOREs[i] < m[j][6]:
-                    dickCOREs[i] = m[j][6]
+                if matriz < int(m[j][6]):
+                    matriz = int(m[j][6])
+        dickCOREs[i] = matriz
     for i in Vfab:
         for j in range(len(m)):
             if m[j][1] == i:
                 if m[j][6] == dickCOREs[i]:
-                    if dickCLOCKs < m[j][8]:
-                        dickCLOCKs[i] = m[j][8]
+                    if dickCLOCKs[i] < int(m[j][8]):
+                        dickCLOCKs[i] = int(m[j][8])
     return dickCOREs, dickCLOCKs
 
 def vetorfab(m):
@@ -209,6 +221,7 @@ def Trata_arq(m):
 
 opcao = 1
 arquivo = "smartphone_cpu_stats.csv"
+arquivo2 = "Produtos_apple.csv"
 can = False
 while opcao != 0:
     opcao = menu()
@@ -246,16 +259,14 @@ while opcao != 0:
             print('A empresa ' + i + ' usa as cpus: ' + str(CPUs[i].strip().replace('  ', ', ')) + '\n')
     elif opcao == 10:
         Apple = Listarapple(R_arq)
-        for i in range(len(Apple)):
-            print(Apple[i])
     elif opcao == 11:
         COREs = Coreconfig(R_arq)
         for i in range(len(COREs)):
             print('a empresa: ' + Vfab[i] + ' tem como a Core config mais usada: ' + COREs[i][0] + ' com ' + str(COREs[i][1]) + ' aparições')
     elif opcao == 12:
-        Clock = Maiorclock(R_arq)
-        for i in Vfab:
-            print('O melhor clockspeed da empresa: ' + i + ' é de ' + str(Clock[i]))
+        Clock, Vclock = Maiorclock(R_arq)
+        for i in Vclock:
+            print('O melhor dispositivo em termos de clockspeed da empresa: ' + i + ' é o ' + Clock[i])
     elif opcao == 13:
         Cadastra(R_arq)
     elif opcao == 14:
